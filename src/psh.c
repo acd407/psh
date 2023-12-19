@@ -14,8 +14,8 @@ struct shellBuiltin {
 // Prototypes
 
 int psh_cd(char **args);
-int psh_help();
-int psh_exit();
+int psh_help(char **args);
+int psh_exit(char **args);
 
 struct shellBuiltin builtins[] = {
     {"cd", &psh_cd},
@@ -38,16 +38,22 @@ int psh_cd(char **args) {
   return 1;
 }
 
-int psh_help() {
+int psh_help(char **args) {
+  if (args != NULL) {
+    printf("psh: No args needed!");
+  }
   printf("proh14's simple shell\n");
   printf("builtins:\n");
-  for (int i = 0; i < PSH_NUM_BUILTINS; i++) {
+  for (size_t i = 0; i < PSH_NUM_BUILTINS; i++) {
     printf("  %s\n", builtins[i].name);
   }
   return 0;
 }
 
-int psh_exit() {
+int psh_exit(char **args) {
+  if (args != NULL) {
+    printf("psh: No args needed!");
+  }
   exit(0);
   return 0;
 }
@@ -98,12 +104,12 @@ int execute(char **args) {
   if (args[0] == NULL) {
     exit(0);
   }
-  for (int i = 0; i < PSH_NUM_BUILTINS; i++) {
+  for (size_t i = 0; i < PSH_NUM_BUILTINS; i++) {
     if (strcmp(args[0], builtins[i].name) == 0) {
       return (*builtins[i].func)(args);
     }
   }
-  pid_t pid, wpid;
+  pid_t pid;
   int status;
   pid = fork();
   if (pid == 0) {
@@ -115,14 +121,14 @@ int execute(char **args) {
     perror("psh");
   } else {
     do {
-      wpid = waitpid(pid, &status, WUNTRACED);
+      waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
   }
 
   return 1;
 }
 
-void initShell() { strcpy(config.promt, "psh> "); }
+void initShell(void) { strcpy(config.promt, "psh> "); }
 
 int main(void) {
   initShell();
@@ -130,7 +136,7 @@ int main(void) {
     printf("%s", config.promt);
     char *line = read_line();
     char **args = split_line(line);
-    int status = execute(args);
+    execute(args);
     free(line);
     free(args);
   }
