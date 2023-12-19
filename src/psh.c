@@ -6,6 +6,60 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+struct shellBuiltin {
+  char *name;
+  int (*func)(char **args);
+};
+
+// Prototypes
+
+int psh_cd(char **args);
+int psh_help();
+int psh_exit();
+
+struct shellBuiltin builtins[] = {
+    {"cd", &psh_cd},
+    {"help", &psh_help},
+    {"exit", &psh_exit},
+};
+
+#define PSH_NUM_BUILTINS sizeof(builtins) / sizeof(struct shellBuiltin)
+
+// builtins
+
+int psh_cd(char **args) {
+  if (args[1] == NULL) {
+    fprintf(stderr, "psh: expected argument to \"cd\"\n");
+  } else {
+    if (chdir(args[1]) != 0) {
+      perror("psh");
+    }
+  }
+  return 1;
+}
+
+int psh_help() {
+  printf("proh14's simple shell\n");
+  printf("builtins:\n");
+  for (int i = 0; i < PSH_NUM_BUILTINS; i++) {
+    printf("  %s\n", builtins[i].name);
+  }
+  return 0;
+}
+
+int psh_exit() {
+  exit(0);
+  return 0;
+}
+
+// builtins
+
+struct shellConfig {
+  char promt[30];
+};
+
+struct shellConfig config;
+
 char *read_line(void) {
   char *line = NULL;
   size_t bufsize = 0;
@@ -21,10 +75,15 @@ char **split_line(char *line) {
   tokens = malloc(sizeof(char *));
   token = strtok(line, " \t\r\n\a");
   while (token != NULL) {
+
     tokens[position] = token;
     position++;
 
     if (position >= bufsize) {
+      if (tokens == NULL) {
+        perror("psh");
+        exit(EXIT_FAILURE);
+      }
       bufsize += 64;
       tokens = realloc(tokens, bufsize * sizeof(char *));
     }
@@ -36,13 +95,20 @@ char **split_line(char *line) {
 }
 
 int execute(char **args) {
+  if (args[0] == NULL) {
+    exit(0);
+  }
+  for (int i = 0; i < PSH_NUM_BUILTINS; i++) {
+    if (strcmp(args[0], builtins[i].name) == 0) {
+      return (*builtins[i].func)(args);
+    }
+  }
   pid_t pid, wpid;
   int status;
-
   pid = fork();
   if (pid == 0) {
     if (execvp(args[0], args) == -1) {
-      perror("lsh");
+      perror("psh");
     }
     exit(EXIT_FAILURE);
   } else if (pid < 0) {
@@ -56,9 +122,12 @@ int execute(char **args) {
   return 1;
 }
 
+void initShell() { strcpy(config.promt, "psh> "); }
+
 int main(void) {
+  initShell();
   while (1) {
-    printf("psh> ");
+    printf("%s", config.promt);
     char *line = read_line();
     char **args = split_line(line);
     int status = execute(args);
