@@ -1,6 +1,7 @@
 -Wall
 -g
 -Wextra
+-Werror
 -pedantic
 -std=c99
 -I./src/include
