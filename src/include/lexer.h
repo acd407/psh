@@ -1,3 +1,6 @@
+#pragma once
+#ifndef _LEXER_H_
+#define _LEXER_H_
 enum tokenType {
   GENERAL = -1,
   PIPE = '|',
@@ -33,3 +36,4 @@ typedef struct lexer {
 
 int createLexer(char *input, lexer *l);
 void destroyLexer(lexer *l);
+#endif
