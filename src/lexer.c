@@ -33,23 +33,11 @@ static enum token_type get_type(char ch) {
   case '&':
     return AMPERSAND;
     break;
-  case ';':
-    return SEMICOLON;
-    break;
   case '<':
     return LESSER;
     break;
   case '>':
     return GREATER;
-    break;
-  case '\'':
-    return QUOTE;
-    break;
-  case '\"':
-    return DQUOTE;
-    break;
-  case '\\':
-    return ESCAPE_SEQUENCE;
     break;
   default:
     return ARGUMENT;

@@ -4,16 +4,10 @@
 
 enum token_type {
   ARGUMENT,
-  PIPE = '|',
-  AMPERSAND = '&',
-  QUOTE = '\'',
-  DQUOTE = '\"',
-  SEMICOLON = ';',
-  ESCAPE_SEQUENCE = '\\',
-  NEWLINE = '\n',
-  GREATER = '>',
-  WHITESPACE = ' ',
-  LESSER = '<',
+  PIPE,
+  AMPERSAND,
+  GREATER,
+  LESSER,
 };
 
 enum state {
