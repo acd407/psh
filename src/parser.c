@@ -23,4 +23,4 @@ astree *COMMAND3(void);
 astree *SIMPLE_COMMAND1(void);
 astree *SIMPLE_COMMAND2(void);
 
-token *curtok = NULL;
+// token *curtok = NULL;

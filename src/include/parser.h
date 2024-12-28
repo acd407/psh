@@ -4,6 +4,6 @@
 
 #include <lexer.h>
 
-void parse(lexer *l);
+void parse(lexer_t *l);
 
 #endif

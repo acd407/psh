@@ -1,20 +1,19 @@
 #pragma once
 #ifndef _LEXER_H_
 #define _LEXER_H_
-enum tokenType {
-  GENERAL = -1,
+
+enum token_type {
+  ARGUMENT,
   PIPE = '|',
   AMPERSAND = '&',
   QUOTE = '\'',
   DQUOTE = '\"',
   SEMICOLON = ';',
-  ESCAPESEQUENCE = '\\',
+  ESCAPE_SEQUENCE = '\\',
   NEWLINE = '\n',
   GREATER = '>',
-  LESSER = '<',
   WHITESPACE = ' ',
-  NULL_C = 0,
-  NORMAL = -1,
+  LESSER = '<',
 };
 
 enum state {
@@ -23,17 +22,24 @@ enum state {
   IN_DQUOTE,
   IN_ESCAPESEQUENCE,
 };
+
 typedef struct token {
-  char *text;
-  int size;
-  enum tokenType type;
+  char *lexeme;
+  enum token_type type;
   struct token *next;
-} token;
+} token_t;
+
+typedef struct lexical_error {
+  char *message;
+  int character;
+} lexical_error_t;
 
 typedef struct lexer {
-  token *root;
-} lexer;
+  token_t *root;
+  lexical_error_t *error;
+} lexer_t;
 
-int createLexer(char *input, lexer *l);
-void destroyLexer(lexer *l);
+lexer_t *create_lexer(void);
+void lex(lexer_t *l, char *input);
+void destroy_lexer(lexer_t *l);
 #endif
