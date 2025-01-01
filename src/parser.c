@@ -35,6 +35,11 @@ static token_t *peek(void) { return curtok->next; }
 
 static int match_token(enum token_type type) { return curtok->type == type; }
 
+static int expect_token(enum token_type type) {
+  token_t *t = peek();
+  return t != NULL && t->type == type;
+}
+
 static ast_t *simple_command(void) {
   token_t *t = curtok;
   if (t->type != TOKEN_ARGUMENT) {
@@ -52,8 +57,7 @@ static ast_t *simple_command(void) {
 }
 
 static inline ast_t *handle_redirection(enum astype type, ast_t *simple) {
-  token_t *nt = peek();
-  if (nt->type != TOKEN_ARGUMENT) {
+  if (!expect_token(TOKEN_ARGUMENT)) {
     return NULL;
   }
   ast_t *ast = ast_create_node();
@@ -73,11 +77,19 @@ static ast_t *command(void) {
 
   if (match_token(TOKEN_GREATER)) {
     // <simple command> '>' <filename>
-    return handle_redirection(AST_REDIRECT_OUT, simple);
+    ast_t *ast = handle_redirection(AST_REDIRECT_OUT, simple);
+    if (ast == NULL) {
+      ast_destroy_node(simple);
+    }
+    return ast;
   }
   if (match_token(TOKEN_LESSER)) {
     // <simple command> '<' <filename>
-    return handle_redirection(AST_REDIRECT_IN, simple);
+    ast_t *ast = handle_redirection(AST_REDIRECT_IN, simple);
+    if (ast == NULL) {
+      ast_destroy_node(simple);
+    }
+    return ast;
   }
 
   // <simple command>
@@ -93,6 +105,10 @@ static ast_t *pipe(void) {
 
   // <command> '|' <pipe>
   if (match_token(TOKEN_PIPE)) {
+    if (!expect_token(TOKEN_ARGUMENT)) {
+      ast_destroy_node(left);
+      return NULL;
+    }
     ast_t *ast = ast_create_node();
     ast->type = AST_PIPE;
     ast->left = left;
@@ -108,8 +124,16 @@ static ast_t *pipe(void) {
 static ast_t *full_command(void) {
   ast_t *left = pipe();
 
+  if (left == NULL) {
+    return NULL;
+  }
+
   // <pipe> '&' <full command> | <pipe> '&'
   if (match_token(TOKEN_AMPERSAND)) {
+    if (!expect_token(TOKEN_ARGUMENT) && peek() != NULL) {
+      ast_destroy_node(left);
+      return NULL;
+    }
     ast_t *ast = ast_create_node();
     ast->type = AST_BACKGROUND;
     ast->left = left;
@@ -120,6 +144,10 @@ static ast_t *full_command(void) {
 
   // <pipe> ';' <full command> | <pipe> ';'
   if (match_token(TOKEN_SEMICOLON)) {
+    if (!expect_token(TOKEN_ARGUMENT) && peek() != NULL) {
+      ast_destroy_node(left);
+      return NULL;
+    }
     ast_t *ast = ast_create_node();
     ast->type = AST_SEQUENCE;
     ast->left = left;

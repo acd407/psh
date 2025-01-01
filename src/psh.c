@@ -17,7 +17,7 @@ void parsing_error(parsing_error_t *e) {
 int main(void) {
   lexer_t *lexer = lexer_create();
 
-  if (lex(lexer, "echo hello") == NULL) {
+  if (lex(lexer, "echo hello;;") == NULL) {
     lexical_error(lexer->error);
     lexer_destroy(lexer);
     return 1;
