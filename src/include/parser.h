@@ -7,9 +7,16 @@
 
 typedef struct parsing_error {
   char *msg;
-  char bad_char;
+  char *bad_tok;
 } parsing_error_t;
 
-parsing_error_t *parse(lexer_t *l, ast_t **ast);
+typedef struct parser {
+  ast_t *ast;
+  parsing_error_t *err;
+} parser_t;
+
+parser_t *parser_create(void);
+ast_t *parse(parser_t *parser, lexer_t *l);
+void parser_destroy(parser_t *p);
 
 #endif

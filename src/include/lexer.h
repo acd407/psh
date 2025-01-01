@@ -25,7 +25,7 @@ typedef struct token {
 } token_t;
 
 typedef struct lexical_error {
-  char *message;
+  char *msg;
   int character;
 } lexical_error_t;
 
@@ -34,7 +34,9 @@ typedef struct lexer {
   lexical_error_t *error;
 } lexer_t;
 
-lexer_t *create_lexer(void);
-void lex(lexer_t *l, char *input);
-void destroy_lexer(lexer_t *l);
+lexer_t *lexer_create(void);
+token_t *lex(lexer_t *l, char *input);
+void lexer_destroy(lexer_t *l);
+char *token_to_string(token_t *t);
+
 #endif

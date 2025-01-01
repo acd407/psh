@@ -2,6 +2,7 @@
 #include <lexer.h>
 #include <parser.h>
 #include <stdlib.h>
+#include <utils.h>
 
 /* Our tiny shell grammar :)
  *
@@ -59,6 +60,7 @@ static inline ast_t *handle_redirection(enum astype type, ast_t *simple) {
   ast->type = type;
   ast->right = simple;
   ast->token = next_token();
+  next_token();
   return ast;
 }
 
@@ -129,19 +131,41 @@ static ast_t *full_command(void) {
   return left;
 }
 
-static parsing_error_t *parseing_error_create(token_t *t) {
-  (void)t;
-  parsing_error_t *err = malloc(sizeof(parsing_error_t));
-  err->msg = "parse error";
-  return err;
+static void add_error(parser_t *p, token_t *t) {
+  if (p->err != NULL) {
+    free(p->err);
+  }
+  parsing_error_t *err = xmalloc(sizeof(parsing_error_t));
+  err->msg = "parsing error: bad token";
+  err->bad_tok = token_to_string(t);
+  p->err = err;
 }
 
-parsing_error_t *parse(lexer_t *l, ast_t **ast) {
-  parsing_error_t *err = NULL;
+parser_t *parser_create(void) {
+  parser_t *p = xmalloc(sizeof(parser_t));
+  p->ast = NULL;
+  p->err = NULL;
+  return p;
+}
+
+ast_t *parse(parser_t *parser, lexer_t *l) {
   curtok = l->root;
-  *ast = full_command();
+  parser->ast = full_command();
   if (peek() != NULL) {
-    err = parseing_error_create(curtok);
+    add_error(parser, peek());
+    curtok = NULL;
+    return NULL;
   }
-  return err;
+  curtok = NULL;
+  return parser->ast;
+}
+
+void parser_destroy(parser_t *p) {
+  ast_destroy_node(p->ast);
+  if (p->err) {
+    free(p->err);
+  }
+  p->err = NULL;
+  free(p);
+  p = NULL;
 }

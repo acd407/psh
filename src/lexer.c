@@ -1,19 +1,20 @@
-#define _DEFAULT_SOURCE
 #include <lexer.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <utils.h>
 
-lexer_t *create_lexer(void) {
-  lexer_t *l = malloc(sizeof(lexer_t));
+lexer_t *lexer_create(void) {
+  lexer_t *l = xmalloc(sizeof(lexer_t));
   l->root = NULL;
   l->error = NULL;
   return l;
 }
 
 static token_t *add_token(token_t *ptok, char *lexeme, enum token_type type) {
-  token_t *t = malloc(sizeof(token_t));
+  token_t *t = xmalloc(sizeof(token_t));
   if (lexeme) {
-    t->lexeme = strdup(lexeme);
+    t->lexeme = xstrdup(lexeme);
   } else {
     t->lexeme = NULL;
   }
@@ -48,6 +49,32 @@ static enum token_type get_type(char ch) {
   }
 }
 
+char *token_to_string(token_t *t) {
+  switch (t->type) {
+  case TOKEN_PIPE:
+    return "|";
+    break;
+  case TOKEN_AMPERSAND:
+    return "&";
+    break;
+  case TOKEN_LESSER:
+    return "<";
+    break;
+  case TOKEN_GREATER:
+    return ">";
+    break;
+  case TOKEN_SEMICOLON:
+    return ";";
+    break;
+  case TOKEN_ARGUMENT:
+    return t->lexeme;
+    break;
+  default:
+    return NULL;
+    break;
+  }
+}
+
 static int advace_string(const char *from, char *to) {
   char type = *from;
   int i = 1;
@@ -64,16 +91,15 @@ static int advace_string(const char *from, char *to) {
 
 static void add_error(lexer_t *l, char *message, int character) {
   if (l->error) {
-    free(l->error->message);
     free(l->error);
   }
-  l->error = malloc(sizeof(lexical_error_t));
-  l->error->message = message;
+  l->error = xmalloc(sizeof(lexical_error_t));
+  l->error->msg = message;
   l->error->character = character;
 }
 
-void lex(lexer_t *l, char *input) {
-  char lexeme[strlen(input) + 1];
+token_t *lex(lexer_t *l, char *input) {
+  char *lexeme = xmalloc(strlen(input) + 1);
   token_t *t = NULL;
   int add = 0;
 
@@ -112,16 +138,16 @@ void lex(lexer_t *l, char *input) {
     case '\"':
       add = advace_string(input + i, lexeme);
       if (add == 0) {
-        add_error(l, "Unmatched quote", i);
-        return;
+        add_error(l, "lexical error: unmatched quote", i);
+        return NULL;
       }
       lexeme_i += add - 2;
       i += add;
       break;
     case '\\':
       if (input[i + 1] == '\0') {
-        add_error(l, "Escape sequence at end of input", i);
-        return;
+        add_error(l, "lexical error: escape sequence at end of input", i);
+        return NULL;
       }
       lexeme[lexeme_i++] = input[i + 1];
       i++;
@@ -136,9 +162,11 @@ void lex(lexer_t *l, char *input) {
     lexeme[lexeme_i] = '\0';
     add_token(t, lexeme, TOKEN_ARGUMENT);
   }
+  free(lexeme);
+  return l->root;
 }
 
-void destroy_lexer(lexer_t *l) {
+void lexer_destroy(lexer_t *l) {
   token_t *t = l->root;
   while (t) {
     token_t *next = t->next;
@@ -147,9 +175,10 @@ void destroy_lexer(lexer_t *l) {
     t = next;
   }
   if (l->error) {
-    free(l->error->message);
     free(l->error);
   }
+  l->error = NULL;
+
   free(l);
   l = NULL;
 }
