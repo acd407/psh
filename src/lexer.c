@@ -28,24 +28,27 @@ static token_t *add_token(token_t *ptok, char *lexeme, enum token_type type) {
 static enum token_type get_type(char ch) {
   switch (ch) {
   case '|':
-    return PIPE;
+    return TOKEN_PIPE;
     break;
   case '&':
-    return AMPERSAND;
+    return TOKEN_AMPERSAND;
     break;
   case '<':
-    return LESSER;
+    return TOKEN_LESSER;
     break;
   case '>':
-    return GREATER;
+    return TOKEN_GREATER;
+    break;
+  case ';':
+    return TOKEN_SEMICOLON;
     break;
   default:
-    return ARGUMENT;
+    return TOKEN_ARGUMENT;
     break;
   }
 }
 
-static int advace_string(char *from, char *to) {
+static int advace_string(const char *from, char *to) {
   char type = *from;
   int i = 1;
   while (from[i] != '\0') {
@@ -84,7 +87,7 @@ void lex(lexer_t *l, char *input) {
       if (lexeme_i > 0) {
         lexeme[lexeme_i] = '\0';
         lexeme_i = 0;
-        t = add_token(t, lexeme, ARGUMENT);
+        t = add_token(t, lexeme, TOKEN_ARGUMENT);
         if (!l->root) {
           l->root = t;
         }
@@ -93,18 +96,15 @@ void lex(lexer_t *l, char *input) {
     case '&':
     case '>':
     case '<':
+    case ';':
     case '|':
       lexeme[lexeme_i] = '\0';
       lexeme_i = 0;
-      t = add_token(t, lexeme, ARGUMENT);
+      t = add_token(t, lexeme, TOKEN_ARGUMENT);
       if (!l->root) {
         l->root = t;
       }
       t = add_token(t, NULL, get_type(input[i]));
-      break;
-    case ';':
-      lexeme[lexeme_i] = '\0';
-      t = add_token(t, lexeme, ARGUMENT);
       break;
     case '\'':
     case '\"':
@@ -132,7 +132,7 @@ void lex(lexer_t *l, char *input) {
   }
   if (lexeme_i > 0) {
     lexeme[lexeme_i] = '\0';
-    add_token(t, lexeme, ARGUMENT);
+    add_token(t, lexeme, TOKEN_ARGUMENT);
   }
 }
 

@@ -3,11 +3,12 @@
 #define _LEXER_H_
 
 enum token_type {
-  ARGUMENT,
-  PIPE,
-  AMPERSAND,
-  GREATER,
-  LESSER,
+  TOKEN_ARGUMENT,
+  TOKEN_PIPE,
+  TOKEN_AMPERSAND,
+  TOKEN_GREATER,
+  TOKEN_LESSER,
+  TOKEN_SEMICOLON,
 };
 
 enum state {
