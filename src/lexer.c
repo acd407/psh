@@ -98,11 +98,13 @@ void lex(lexer_t *l, char *input) {
     case '<':
     case ';':
     case '|':
-      lexeme[lexeme_i] = '\0';
-      lexeme_i = 0;
-      t = add_token(t, lexeme, TOKEN_ARGUMENT);
-      if (!l->root) {
-        l->root = t;
+      if (lexeme_i > 0) {
+        lexeme[lexeme_i] = '\0';
+        lexeme_i = 0;
+        t = add_token(t, lexeme, TOKEN_ARGUMENT);
+        if (!l->root) {
+          l->root = t;
+        }
       }
       t = add_token(t, NULL, get_type(input[i]));
       break;

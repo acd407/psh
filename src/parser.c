@@ -40,7 +40,7 @@ static ast_t *simple_command(void) {
     return NULL;
   }
   ast_t *ast = ast_create_node();
-  ast->type = AST_SIMPLE_COMMAND;
+  ast->type = AST_COMMAND_TAIL;
   ast->token = t;
 
   if (next_token() != NULL) {

@@ -5,7 +5,6 @@
 #include <lexer.h>
 
 enum astype {
-  AST_SIMPLE_COMMAND,
   AST_COMMAND_TAIL,
   AST_BACKGROUND,
   AST_SEQUENCE,

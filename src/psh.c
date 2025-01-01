@@ -7,7 +7,7 @@
 int main(void) {
   lexer_t *lexer = create_lexer();
 
-  lex(lexer, "echo hello > > file.txt");
+  lex(lexer, "echo hello | echo > file.txt");
 
   ast_t *ast;
   parsing_error_t *err = parse(lexer, &ast);

@@ -26,9 +26,6 @@ void ast_destroy_node(ast_t *node) {
 
 static const char *ast_type_to_string(enum astype type) {
   switch (type) {
-  case AST_SIMPLE_COMMAND:
-    return "AST_SIMPLE_COMMAND";
-    break;
   case AST_COMMAND_TAIL:
     return "AST_COMMAND_TAIL";
     break;
