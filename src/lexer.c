@@ -160,7 +160,10 @@ token_t *lex(lexer_t *l, char *input) {
   }
   if (lexeme_i > 0) {
     lexeme[lexeme_i] = '\0';
-    add_token(t, lexeme, TOKEN_ARGUMENT);
+    t = add_token(t, lexeme, TOKEN_ARGUMENT);
+    if (!l->root) {
+      l->root = t;
+    }
   }
   free(lexeme);
   return l->root;

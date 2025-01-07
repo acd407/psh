@@ -1,4 +1,5 @@
 #include <ast.h>
+#include <eval.h>
 #include <lexer.h>
 #include <parser.h>
 #include <psh.h>
@@ -17,7 +18,7 @@ void parsing_error(parsing_error_t *e) {
 int main(void) {
   lexer_t *lexer = lexer_create();
 
-  if (lex(lexer, "echo hello;;") == NULL) {
+  if (lex(lexer, "cat < output.txt") == NULL) {
     lexical_error(lexer->error);
     lexer_destroy(lexer);
     return 1;
@@ -34,6 +35,7 @@ int main(void) {
   }
 
   ast_print(parser->ast, 0);
+  evaluate(parser);
 
   parser_destroy(parser);
   lexer_destroy(lexer);
