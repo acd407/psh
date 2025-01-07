@@ -1,4 +1,3 @@
-#include <ast.h>
 #include <eval.h>
 #include <lexer.h>
 #include <parser.h>
@@ -7,21 +6,22 @@
 #include <stdlib.h>
 #include <utils.h>
 
-void lexical_error(lexical_error_t *e) {
+#include <readline/history.h>
+#include <readline/readline.h>
+
+static void lexical_error(lexical_error_t *e) {
   eprintf("%s: %s: at character %d\n", PROGRAM_NAME, e->msg, e->character);
 }
 
-void parsing_error(parsing_error_t *e) {
+static void parsing_error(parsing_error_t *e) {
   eprintf("%s: %s: '%s'\n", PROGRAM_NAME, e->msg, e->bad_tok);
 }
 
-int main(void) {
+static void do_input(char *input) {
   lexer_t *lexer = lexer_create();
-
-  if (lex(lexer, "cat < output.txt") == NULL) {
+  if (lex(lexer, input) == NULL) {
     lexical_error(lexer->error);
     lexer_destroy(lexer);
-    return 1;
   }
 
   parser_t *parser = parser_create();
@@ -31,14 +31,24 @@ int main(void) {
 
     parser_destroy(parser);
     lexer_destroy(lexer);
-    return 1;
   }
 
-  ast_print(parser->ast, 0);
   evaluate(parser);
 
   parser_destroy(parser);
   lexer_destroy(lexer);
+}
 
+int main(void) {
+
+  while (1) {
+    char *input = readline(PROMPT);
+
+    add_history(input);
+
+    do_input(input);
+
+    free(input);
+  }
   return 0;
 }
