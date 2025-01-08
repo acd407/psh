@@ -1,4 +1,5 @@
 #include <ast.h>
+#include <builtins.h>
 #include <exec.h>
 #include <fcntl.h>
 #include <psh.h>
@@ -47,6 +48,13 @@ static int xopen(const char *path, int flags, mode_t mode) {
 
 void command_execute(command_t *cmd) {
   if (cmd->argc == 0) {
+    return;
+  }
+
+  // Builtins
+  builtin_t *builtin = builtin_find_by_name(cmd->argv[0]);
+  if (builtin) {
+    builtin_execute(builtin, cmd->argc, cmd->argv);
     return;
   }
 
