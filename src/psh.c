@@ -35,6 +35,7 @@ static void do_input(char *input) {
   if (lex(lexer, input) == NULL) {
     lexical_error(lexer->error);
     lexer_destroy(lexer);
+    return;
   }
 
   parser_t *parser = parser_create();
@@ -44,6 +45,7 @@ static void do_input(char *input) {
 
     parser_destroy(parser);
     lexer_destroy(lexer);
+    return;
   }
 
   evaluate(parser);
