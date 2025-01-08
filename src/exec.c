@@ -36,6 +36,7 @@ void command_argv_from_ast(command_t *cmd, ast_t *ast) {
     cmd->argv[i] = xstrdup(ast->token->lexeme);
     ast = ast->right;
   }
+  cmd->argv[cmd->argc] = NULL;
 }
 
 static int xopen(const char *path, int flags, mode_t mode) {

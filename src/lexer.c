@@ -1,7 +1,7 @@
+#include <glob.h>
 #include <lexer.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <utils.h>
 
 lexer_t *lexer_create(void) {
@@ -98,6 +98,31 @@ static void add_error(lexer_t *l, char *message, int character) {
   l->error->character = character;
 }
 
+static token_t *add_lexeme(lexer_t *l, token_t *prev, char *lexeme,
+                           int *lexeme_i) {
+  if (*lexeme_i <= 0) {
+    return prev;
+  }
+
+  lexeme[*lexeme_i] = '\0';
+  *lexeme_i = 0;
+
+  glob_t globbuf;
+  glob(lexeme, GLOB_TILDE | GLOB_NOCHECK | GLOB_NOSORT, NULL, &globbuf);
+
+  for (size_t i = 0; i < globbuf.gl_pathc; i++) {
+    prev = add_token(prev, globbuf.gl_pathv[i], TOKEN_ARGUMENT);
+  }
+
+  if (!l->root) {
+    l->root = prev;
+  }
+
+  globfree(&globbuf);
+
+  return prev;
+}
+
 token_t *lex(lexer_t *l, char *input) {
   char *lexeme = xmalloc(strlen(input) + 1);
   token_t *t = NULL;
@@ -110,28 +135,14 @@ token_t *lex(lexer_t *l, char *input) {
     case ' ':
     case '\t':
     case '\n':
-      if (lexeme_i > 0) {
-        lexeme[lexeme_i] = '\0';
-        lexeme_i = 0;
-        t = add_token(t, lexeme, TOKEN_ARGUMENT);
-        if (!l->root) {
-          l->root = t;
-        }
-      }
+      t = add_lexeme(l, t, lexeme, &lexeme_i);
       break;
     case '&':
     case '>':
     case '<':
     case ';':
     case '|':
-      if (lexeme_i > 0) {
-        lexeme[lexeme_i] = '\0';
-        lexeme_i = 0;
-        t = add_token(t, lexeme, TOKEN_ARGUMENT);
-        if (!l->root) {
-          l->root = t;
-        }
-      }
+      t = add_lexeme(l, t, lexeme, &lexeme_i);
       t = add_token(t, NULL, get_type(input[i]));
       break;
     case '\'':
@@ -158,13 +169,8 @@ token_t *lex(lexer_t *l, char *input) {
     }
     i++;
   }
-  if (lexeme_i > 0) {
-    lexeme[lexeme_i] = '\0';
-    t = add_token(t, lexeme, TOKEN_ARGUMENT);
-    if (!l->root) {
-      l->root = t;
-    }
-  }
+
+  t = add_lexeme(l, t, lexeme, &lexeme_i);
   free(lexeme);
   return l->root;
 }
