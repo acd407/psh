@@ -11,14 +11,14 @@
 [![asciicast](https://asciinema.org/a/ojkpeKFyhRJgohB4LNHK3sJ4w.svg)](https://asciinema.org/a/ojkpeKFyhRJgohB4LNHK3sJ4w)
 
 ### Features:
-1- Basic commands
-2- Wildcards
-3- Redirections
-4- Pipes
-5- Background jobs
-6- Seperate commands with ';'
-7- Signal handling
-8- Cursor movement, tab, history with libreadline
+1. Basic commands
+2. Wildcards
+3. Redirections
+4. Pipes
+5. Background jobs
+6. Seperate commands with ';'
+7. Signal handling
+8. Cursor movement, tab, history with libreadline
 
 ### How to install⬇️:
 1. Clone this repo.
