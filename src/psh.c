@@ -60,6 +60,10 @@ int main(void) {
   while (1) {
     char *input = readline(PROMPT);
 
+    if (feof(stdin) || input == NULL) {
+      exit(0);
+    }
+
     add_history(input);
 
     do_input(input);
