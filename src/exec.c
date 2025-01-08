@@ -1,14 +1,19 @@
+#define _DEFAULT_SOURCE
 #include <ast.h>
 #include <builtins.h>
 #include <exec.h>
 #include <fcntl.h>
 #include <psh.h>
+#include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <utils.h>
 #include <wait.h>
+
+#include <readline/readline.h>
 
 static void command_reset(command_t *cmd) {
   cmd->argc = 0;
@@ -47,6 +52,28 @@ static int xopen(const char *path, int flags, mode_t mode) {
   return fd;
 }
 
+static void untrap_signals(void) {
+  signal(SIGINT, SIG_DFL);
+  signal(SIGQUIT, SIG_DFL);
+  signal(SIGTSTP, SIG_DFL);
+  signal(SIGTTIN, SIG_DFL);
+  signal(SIGTTOU, SIG_DFL);
+}
+
+static void background_signal_handler(int signo) {
+  if (signo == SIGCHLD) {
+    int status;
+    pid_t pid;
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+      if (WIFEXITED(status) || WIFSIGNALED(status)) {
+        printf("[BACKGROUND] Process %d exited\n", pid);
+        rl_on_new_line();
+        rl_refresh_line(0, 0);
+      }
+    }
+  }
+}
+
 void command_execute(command_t *cmd) {
   if (cmd->argc == 0) {
     return;
@@ -68,8 +95,12 @@ void command_execute(command_t *cmd) {
 
   // Child
   if (pid == 0) {
+    untrap_signals();
 
     if (cmd->bg) {
+      printf("\n[BACKGROUND] started backgroundjob: %s\n", cmd->argv[0]);
+      setpgid(0, 0);
+
       int fd = xopen("/dev/null", O_RDONLY, 0);
       dup2(fd, STDIN_FILENO);
       close(fd);
@@ -96,7 +127,16 @@ void command_execute(command_t *cmd) {
     do {
       waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    return;
   }
+
+  // Background process
+  struct sigaction sa;
+  sa.sa_handler = background_signal_handler;
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = SA_RESTART | SA_NOCLDSTOP; // Restart interrupted syscalls,
+                                           // don't handle stopped children
+  sigaction(SIGCHLD, &sa, NULL);
 }
 
 void command_destroy(command_t *cmd) {

@@ -2,6 +2,7 @@
 #include <lexer.h>
 #include <parser.h>
 #include <psh.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <utils.h>
@@ -10,11 +11,23 @@
 #include <readline/readline.h>
 
 static void lexical_error(lexical_error_t *e) {
+  if (e == NULL) {
+    return;
+  }
   eprintf("%s: %s: at character %d\n", PROGRAM_NAME, e->msg, e->character);
 }
 
 static void parsing_error(parsing_error_t *e) {
+  if (e == NULL) {
+    return;
+  }
   eprintf("%s: %s: '%s'\n", PROGRAM_NAME, e->msg, e->bad_tok);
+}
+
+static void trap_signals(void) {
+  signal(SIGINT, SIG_IGN);
+  signal(SIGQUIT, SIG_IGN);
+  signal(SIGTSTP, SIG_IGN);
 }
 
 static void do_input(char *input) {
@@ -40,6 +53,7 @@ static void do_input(char *input) {
 }
 
 int main(void) {
+  trap_signals();
 
   while (1) {
     char *input = readline(PROMPT);
