@@ -124,13 +124,14 @@ static token_t *add_lexeme(lexer_t *l, token_t *prev, char *lexeme,
 }
 
 token_t *lex(lexer_t *l, char *input) {
-  char *lexeme = xmalloc(strlen(input) + 1);
+  int len = (int)strlen(input) + 1;
+  char *lexeme = xmalloc(len);
   token_t *t = NULL;
   int add = 0;
 
   int i = 0;
   int lexeme_i = 0;
-  while (input[i] != '\0') {
+  while (i < len - 1) {
     switch (input[i]) {
     case ' ':
     case '\t':
@@ -147,7 +148,7 @@ token_t *lex(lexer_t *l, char *input) {
       break;
     case '\'':
     case '\"':
-      add = advace_string(input + i, lexeme);
+      add = advace_string(input + i, lexeme + lexeme_i);
       if (add == 0) {
         add_error(l, "lexical error: unmatched quote", i);
         return NULL;
