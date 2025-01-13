@@ -20,6 +20,12 @@
 7. Signal handling
 8. Cursor movement, tab, history with libreadline
 
+### Motivation:
+I did this mostly for the sake of learning and fun! I always wanted to have my own small shell that I can run everywhere and I can add custom features to.
+I am aiming to implement some other features in this later like aliasing, enviromental variables and some basic if/else logics :)
+
+
+
 ### How to install⬇️:
 1. Clone this repo.
 ```shell
