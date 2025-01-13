@@ -30,7 +30,7 @@ I am aiming to implement some other features in this later like aliasing, enviro
 1. Clone this repo.
 ```shell
 git clone https://github.com/proh14/psh.git
-cd ptext
+cd psh
 ```
 2. Run `make` inside this repo's main directory.
 ```shell
