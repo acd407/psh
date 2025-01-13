@@ -22,7 +22,7 @@
 
 ### Motivation:
 I did this mostly for the sake of learning and fun! I always wanted to have my own small shell that I can run everywhere and I can add custom features to.
-I am aiming to implement some other features in this later like aliasing, enviromental variables and some basic if/else logics :)
+I am aiming to implement some other features in this later like aliasing, enviromental variables and some basic if/else logics :). This project can also be seen as learning resource for people who want to learn how to make their own shell(I might write an article on this topic).
 
 
 
