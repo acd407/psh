@@ -13,7 +13,9 @@ static void builtin_exit(int argc, char **argv) {
 
 static void builtin_cd(int argc, char **argv) {
   if (argc == 1) {
-    chdir(getenv("HOME"));
+    if (chdir(getenv("HOME")) == -1) {
+      perror("cd");
+    }
   } else if (argc == 2) {
     if (chdir(argv[1]) == -1) {
       perror("cd");
