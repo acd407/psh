@@ -27,6 +27,14 @@ I am aiming to implement some other features in this later like aliasing, enviro
 
 
 ### How to install⬇️:
+
+#### Arch Linux
+[psh](https://aur.archlinux.org/packages/psh) is available on AUR. You can install it using an AUR helper (e.g. paru):
+```shell
+paru -S psh
+```
+
+#### Manually
 1. Clone this repo.
 ```shell
 git clone https://github.com/proh14/psh.git
