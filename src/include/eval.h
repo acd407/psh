@@ -4,6 +4,6 @@
 
 #include <parser.h>
 
-void evaluate(parser_t *parser);
+void evaluate (parser_t *parser);
 
 #endif // ! _EVAL_H_
