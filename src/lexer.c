@@ -124,14 +124,14 @@ add_lexeme (lexer_t *l, token_t *prev, char *lexeme, int *lexeme_i) {
 }
 
 token_t *lex (lexer_t *l, char *input) {
-    int len = (int) strlen (input) + 1;
-    char *lexeme = xmalloc (len);
+    int len = (int) strlen (input);
+    char *lexeme = xmalloc (len + 1);
     token_t *t = NULL;
     int add = 0;
 
     int i = 0;
     int lexeme_i = 0;
-    while (i < len - 1) {
+    while (i < len) {
         switch (input[i]) {
         case ' ':
         case '\t':
@@ -165,6 +165,14 @@ token_t *lex (lexer_t *l, char *input) {
             }
             lexeme[lexeme_i++] = input[i + 1];
             i++;
+            break;
+        case '#':
+            // 跳过当前行剩余字符（直到遇到换行符或字符串结尾）
+            while (i < len && input[i] != '\n') {
+                i++;
+            }
+            // 如果当前行是纯注释，确保已收集的 lexeme 被处理
+            t = add_lexeme (l, t, lexeme, &lexeme_i);
             break;
         default:
             lexeme[lexeme_i++] = input[i];
