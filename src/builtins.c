@@ -1,6 +1,8 @@
 #include <builtins.h>
 #include <stdio.h>
 #define _GNU_SOURCE
+#include <alloca.h>
+#include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -52,30 +54,45 @@ static void builtin_set (int argc, char **argv) {
     int p = 0;
     while (arg[p] && arg[p] != '=')
         p++;
-    if (!arg[p]) {
+    if (!arg[p]) { // only a key
         char *val = getenv (arg);
         if (val)
             puts (val);
-        else {
-            eprintf ("set: empty value\n");
-            return;
-        }
-        return;
-    }
-    if (arg[1 + p]) {
-        char *argkv = malloc (strlen (arg) + 1);
+        else
+            eprintf ("set: empty\n");
+    } else {
+        char *argkv = alloca (strlen (arg) + 1);
         strcpy (argkv, arg);
-        argkv[p] = '\0';
-        setenv (argkv, &arg[p + 1], 1);
-        free (argkv);
+        argkv[p++] = '\0';
+        if (arg[p]) { // with value
+            if (setenv (argkv, &arg[p], 1) == -1)
+                perror ("set");
+        } else { // have '=' but without value
+            if (unsetenv (argkv) == -1)
+                perror ("set");
+        }
     }
 }
 
+void builtin_ls (int argc, char **argv) {
+    DIR *d;
+    if (argc == 2)
+        d = opendir (argv[1]);
+    else
+        d = opendir (".");
+    if (d) {
+        struct dirent *dir;
+        while ((dir = readdir (d)) != NULL)
+            printf ("%s\n", dir->d_name);
+        if (closedir (d) == -1)
+            perror ("ls");
+    } else
+        perror ("ls");
+}
+
 static builtin_t builtins[] = {
-    {"exit", &builtin_exit},
-    {"cd", &builtin_cd},
-    {"pwd", &builtin_pwd},
-    {"set", &builtin_set},
+    {"exit", &builtin_exit}, {"cd", &builtin_cd}, {"pwd", &builtin_pwd},
+    {"set", &builtin_set},   {"l", &builtin_ls},
 };
 
 builtin_t *builtin_find_by_name (char *name) {
